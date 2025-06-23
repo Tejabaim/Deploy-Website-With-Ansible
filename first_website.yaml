@@ -33,15 +33,14 @@
         owner: "{{ ansible_user }}"
         group: "{{ ansible_user }}"
         recurse: yes
-
     - name: Copy website files using rsync from master to managed node
-      synchronize:
+      ansible.builtin.synchronize:
         src: "{{ website_src }}"
         dest: "{{ website_dest }}"
         recursive: yes
         rsync_path: "rsync"
-      delegate_to: localhost
-      become: false  # 🔥 This is the KEY to fix your issue!
+        delegate_to: localhost
+        become: false
 
     - name: Restore ownership to www-data
       file:
