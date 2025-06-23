@@ -43,8 +43,9 @@
         src: "{{ website_src }}"
         dest: "{{ website_tmp_dest }}"
         recursive: yes
+      delegate_to: localhost
 
-    - name: Ensure web root directory exists
+    - name: Ensure final web root exists
       file:
         path: "{{ website_final_dest }}"
         state: directory
@@ -53,7 +54,10 @@
         group: root
 
     - name: Copy files from tmp to final web root
-      command: mv {{ website_tmp_dest }}/* {{ website_final_dest }}/
+      shell: mv {{ website_tmp_dest }}/* {{ website_final_dest }}/
+      args:
+        executable: /bin/bash
+      become: true
 
     - name: Set ownership to www-data for website files
       file:
