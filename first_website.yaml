@@ -1,12 +1,14 @@
 ---
 - name: Deploy Website on Ubuntu
   hosts: web
-  become: true  # needed for other tasks, not for rsync
+  become: true
   vars:
     website_src: ./templatemo_520_highway/
-    website_dest: /var/www/html/
+    website_tmp_dest: /tmp/html
+    website_final_dest: /var/www/html
 
   tasks:
+
     - name: Update APT cache
       apt:
         update_cache: yes
@@ -22,26 +24,40 @@
         state: started
         enabled: yes
 
-    - name: Install rsync on target
+    - name: Install rsync
       apt:
         name: rsync
         state: present
 
-    - name: Change ownership of web root to ansible_user
+    - name: Ensure temporary web directory exists
       file:
-        path: "{{ website_dest }}"
+        path: "{{ website_tmp_dest }}"
+        state: directory
+        mode: '0755'
         owner: "{{ ansible_user }}"
         group: "{{ ansible_user }}"
-        recurse: yes
-    - name: Copy website files using rsync from master to managed node
+      become: false
+
+    - name: Rsync website files to remote node under /tmp
       synchronize:
         src: "{{ website_src }}"
-        dest: "{{ website_dest }}"
+        dest: "{{ website_tmp_dest }}"
         recursive: yes
 
-    - name: Restore ownership to www-data
+    - name: Ensure web root directory exists
       file:
-        path: "{{ website_dest }}"
+        path: "{{ website_final_dest }}"
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+
+    - name: Copy files from tmp to final web root
+      command: mv {{ website_tmp_dest }}/* {{ website_final_dest }}/
+
+    - name: Set ownership to www-data for website files
+      file:
+        path: "{{ website_final_dest }}"
         owner: www-data
         group: www-data
         recurse: yes
