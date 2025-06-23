@@ -1,0 +1,53 @@
+---
+- name: Deploy Website on Ubuntu
+  hosts: web
+    #become: true  # needed for other tasks, not for rsync
+  vars:
+    website_src: ./templatemo_520_highway/
+    website_dest: /var/www/html/
+
+  tasks:
+    - name: Update APT cache
+      apt:
+        update_cache: yes
+
+    - name: Install Apache2
+      apt:
+        name: apache2
+        state: present
+
+    - name: Enable and start Apache2
+      systemd:
+        name: apache2
+        state: started
+        enabled: yes
+
+    - name: Install rsync on target
+      apt:
+        name: rsync
+        state: present
+
+    - name: Change ownership of web root to ansible_user
+      file:
+        path: "{{ website_dest }}"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        recurse: yes
+      become: true
+
+    - name: Copy website files using rsync from master to managed node
+      synchronize:
+        src: "{{ website_src }}"
+        dest: "{{ website_dest }}"
+        recursive: yes
+        rsync_path: "rsync"
+      delegate_to: localhost
+      become: false  # 🔥 This is the KEY to fix your issue!
+
+    - name: Restore ownership to www-data
+      file:
+        path: "{{ website_dest }}"
+        owner: www-data
+        group: www-data
+        recurse: yes
+
