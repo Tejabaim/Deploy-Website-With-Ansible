@@ -34,7 +34,7 @@
         group: "{{ ansible_user }}"
         recurse: yes
     - name: Copy website files using rsync from master to managed node
-      ansible.builtin.synchronize:
+      synchronize:
         src: "{{ website_src }}"
         dest: "{{ website_dest }}"
         recursive: yes
