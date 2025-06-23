@@ -1,7 +1,7 @@
 ---
 - name: Deploy Website on Ubuntu
   hosts: web
-    #become: true  # needed for other tasks, not for rsync
+  become: true  # needed for other tasks, not for rsync
   vars:
     website_src: ./templatemo_520_highway/
     website_dest: /var/www/html/
@@ -33,7 +33,6 @@
         owner: "{{ ansible_user }}"
         group: "{{ ansible_user }}"
         recurse: yes
-          # become: true
 
     - name: Copy website files using rsync from master to managed node
       synchronize:
