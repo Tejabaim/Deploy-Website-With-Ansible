@@ -1,6 +1,6 @@
 ---
 - name: Simple test playbook
-  hosts: all
+  hosts: web
   gather_facts: yes
 
   tasks:
