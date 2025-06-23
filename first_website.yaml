@@ -38,9 +38,6 @@
         src: "{{ website_src }}"
         dest: "{{ website_dest }}"
         recursive: yes
-        rsync_path: "rsync"
-        delegate_to: localhost
-        become: false
 
     - name: Restore ownership to www-data
       file:
