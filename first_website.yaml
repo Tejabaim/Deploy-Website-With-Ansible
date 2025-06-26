@@ -64,5 +64,5 @@
         path: "{{ website_final_dest }}"
         owner: www-data
         group: www-data
-        recurse: yes
+        recurse: no
 
